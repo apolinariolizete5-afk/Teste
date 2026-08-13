@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moza Empregos | Criador de CV</title>
+<style>
+:root{
+  --accent:#1769e0;
+  --side:#102d4d;
+  --bg:#f3f6fa;
+  --text:#162033;
+  --muted:#66758a;
+  --line:#d9e0e9;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,Arial,Helvetica,sans-serif;
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+
+.app{max-width:1500px;margin:auto;padding:22px}
+.top{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:18px;margin-bottom:18px
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{font-size:32px}
+.brand h1{margin:0;font-size:24px;letter-spacing:.2px}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.actions{display:flex;gap:9px}
+.btn{
+  border:0;border-radius:9px;padding:12px 16px;font-weight:800
+}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.outline{background:#fff;border:1px solid #b9c5d5;color:#182235}
+
+.layout{
+  display:grid;
+  grid-template-columns:390px minmax(0,1fr);
+  gap:18px;
+  align-items:start
+}
+.editor{max-height:calc(100vh - 100px);overflow:auto;padding-right:2px}
+.card{
+  background:#fff;border:1px solid #e2e8f0;border-radius:13px;
+  padding:16px;margin-bottom:13px;
+  box-shadow:0 3px 12px rgba(20,35,55,.05)
+}
+.card h2{
+  color:var(--accent);font-size:14px;margin:0 0 13px;
+  letter-spacing:.2px
+}
+label{display:block;font-size:12.5px;font-weight:800;margin:11px 0 5px}
+input,textarea{
+  width:100%;border:1px solid #d1d9e5;border-radius:8px;
+  padding:10px 11px;background:#fff;outline:none
+}
+input:focus,textarea:focus{border-color:var(--accent)}
+textarea{min-height:82px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.photoBox{display:flex;align-items:center;gap:12px}
+.photoPreview{
+  width:78px;height:78px;border-radius:50%;object-fit:cover;
+  background:#e7ecf3
+}
+.model-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.model{
+  border:2px solid #dce3ed;border-radius:8px;background:#fff;
+  padding:5px
+}
+.model.active{border-color:var(--accent)}
+.thumb{
+  height:72px;border-radius:5px;overflow:hidden
+}
+.thumb.a{background:linear-gradient(90deg,#102d4d 36%,#fff 36%)}
+.thumb.b{background:linear-gradient(90deg,#173e2e 34%,#fff 34%)}
+.thumb.c{background:linear-gradient(90deg,#9a5b12 29%,#fff 29%)}
+.model small{display:block;text-align:center;font-size:11px;font-weight:800;margin-top:5px}
+
+.stage{
+  background:#dfe5ec;border-radius:14px;
+  padding:26px;min-height:calc(100vh - 100px);
+  display:flex;justify-content:center;align-items:flex-start;
+  overflow:auto
+}
+
+/* Desktop: true A4 */
+.cv{
+  width:210mm;
+  min-height:297mm;
+  background:#fff;
+  display:grid;
+  grid-template-columns:34% 66%;
+  box-shadow:0 8px 30px rgba(0,0,0,.18);
+  flex:none
+}
+.side{
+  background:var(--side);
+  color:#fff;
+  padding:31px 24px
+}
+.main{padding:35px 34px}
+.cvphoto{
+  display:block;width:112px;height:112px;border-radius:50%;
+  object-fit:cover;background:#dfe6ef;
+  border:5px solid rgba(255,255,255,.9);
+  margin:0 auto 22px
+}
+.side h3{
+  font-size:13px;letter-spacing:1.1px;
+  margin:22px 0 8px;padding-bottom:6px;
+  border-bottom:1px solid rgba(255,255,255,.55)
+}
+.side p,.side div{font-size:11.5px;line-height:1.55}
+.side .line{margin:4px 0}
+.side ul{margin:7px 0;padding-left:16px}
+.cvname{
+  font-size:31px;line-height:1.05;margin:0;
+  text-transform:uppercase;letter-spacing:.5px
+}
+.cvjob{
+  color:var(--accent);font-weight:900;
+  font-size:14px;letter-spacing:1.5px;margin-top:8px
+}
+.section{margin:29px 0 0}
+.section h2{
+  font-size:14px;letter-spacing:1px;
+  margin:0 0 10px;padding-bottom:7px;
+  border-bottom:1px solid var(--line)
+}
+.section p{
+  white-space:pre-line;font-size:12px;line-height:1.55;margin:0
+}
+.entry{margin-bottom:14px}
+.entry-title{font-weight:800;font-size:13px}
+.entry-meta{color:var(--accent);font-size:11.5px;font-weight:800;margin:3px 0}
+.entry-desc{white-space:pre-line;font-size:11.8px;line-height:1.5}
+.empty{color:#98a5b6}
+
+@media(max-width:1050px){
+  .layout{grid-template-columns:1fr}
+  .editor{max-height:none}
+  .stage{min-height:auto}
+}
+
+/*
+ Mobile:
+ Do NOT use transform:scale() on the CV.
+ That was the reason the previous version showed only a thin
+ sidebar and made the rest look squeezed/clipped.
+ Instead the A4 preview becomes a responsive two-column card.
+*/
+@media(max-width:650px){
+  .app{padding:10px}
+  .top{flex-direction:column;align-items:stretch}
+  .brand h1{font-size:20px}
+  .brand p{font-size:12px}
+  .actions{width:100%}
+  .actions .btn{flex:1;padding:11px 8px;font-size:12px}
+  .row{grid-template-columns:1fr}
+  .stage{
+    padding:8px;
+    border-radius:10px;
+    overflow:visible;
+    display:block
+  }
+  .cv{
+    width:100%;
+    min-height:0;
+    grid-template-columns:34% 66%;
+    box-shadow:0 3px 15px rgba(0,0,0,.14)
+  }
+  .side{padding:20px 12px}
+  .main{padding:22px 17px}
+  .cvphoto{
+    width:72px;height:72px;
+    border-width:3px;
+    margin-bottom:15px
+  }
+  .side h3{font-size:9px;letter-spacing:.7px;margin:15px 0 6px}
+  .side p,.side div,.side li{font-size:7.5px;line-height:1.45}
+  .side ul{padding-left:11px}
+  .cvname{font-size:20px}
+  .cvjob{font-size:9px;letter-spacing:.9px;margin-top:5px}
+  .section{margin-top:19px}
+  .section h2{font-size:9px;letter-spacing:.7px;margin-bottom:7px;padding-bottom:4px}
+  .section p,.entry-desc{font-size:8px;line-height:1.45}
+  .entry{margin-bottom:9px}
+  .entry-title{font-size:8.5px}
+  .entry-meta{font-size:7.5px;margin:2px 0}
+}
+
+/* Print/export: preserve genuine A4 */
+@page{size:A4;margin:0}
+@media print{
+  body{background:#fff}
+  .top,.editor{display:none!important}
+  .app{padding:0}
+  .layout{display:block}
+  .stage{display:block;padding:0;background:#fff}
+  .cv{
+    width:210mm;
+    min-height:297mm;
+    box-shadow:none;
+    grid-template-columns:34% 66%
+  }
+  .side{padding:31px 24px}
+  .main{padding:35px 34px}
+  .cvphoto{width:112px;height:112px}
+  .side h3{font-size:13px}
+  .side p,.side div{font-size:11.5px}
+  .cvname{font-size:31px}
+  .cvjob{font-size:14px}
+  .section h2{font-size:14px}
+  .section p{font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand">
+    <div class="logo">📄</div>
+    <div>
+      <h1>CRIAR O MEU CV</h1>
+      <p>Preencha os seus dados e gere um CV profissional</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn outline" onclick="window.print()">👁 Pré-visualizar</button>
+    <button class="btn primary" onclick="window.print()">⇩ Baixar PDF</button>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="editor">
+
+<div class="card">
+  <h2>▦ ESCOLHA UM MODELO</h2>
+  <div class="model-grid">
+    <div class="model active" onclick="setModel('a',this)"><div class="thumb a"></div><small>Modelo 1</small></div>
+    <div class="model" onclick="setModel('b',this)"><div class="thumb b"></div><small>Modelo 2</small></div>
+    <div class="model" onclick="setModel('c',this)"><div class="thumb c"></div><small>Modelo 3</small></div>
+  </div>
+</div>
+
+<div class="card">
+<h2>♙ DADOS PESSOAIS</h2>
+<label>Foto</label>
+<div class="photoBox">
+  <img id="inputPhoto" class="photoPreview" alt="">
+  <input id="photo" type="file" accept="image/*">
+</div>
+<label>Nome completo</label><input id="name" placeholder="Ex.: João Manuel da Silva">
+<label>Profissão / Cargo pretendido</label><input id="job" placeholder="Ex.: Assistente Administrativo">
+<div class="row">
+<div><label>Email</label><input id="email" placeholder="Ex.: joao@email.com"></div>
+<div><label>Telefone</label><input id="phone" placeholder="Ex.: 84 123 4567"></div>
+</div>
+<label>Localização</label><input id="location" placeholder="Ex.: Maputo, Moçambique">
+<label>LinkedIn (opcional)</label><input id="linkedin" placeholder="Ex.: linkedin.com/in/seunome">
+</div>
+
+<div class="card"><h2>♙ PERFIL PROFISSIONAL</h2><textarea id="profile" placeholder="Fale brevemente sobre a sua experiência, competências e objetivo profissional."></textarea></div>
+<div class="card"><h2>▣ EXPERIÊNCIA PROFISSIONAL</h2><textarea id="experience" placeholder="Cargo | Empresa | Período&#10;Principais responsabilidades...&#10;&#10;Cargo | Empresa | Período&#10;Principais responsabilidades..."></textarea></div>
+<div class="card"><h2>▤ FORMAÇÃO ACADÉMICA</h2><textarea id="education" placeholder="Curso | Instituição | Período"></textarea></div>
+<div class="card"><h2>⚙ COMPETÊNCIAS</h2><textarea id="skills" placeholder="Comunicação&#10;Trabalho em equipa&#10;Microsoft Office"></textarea></div>
+<div class="card"><h2>◈ IDIOMAS</h2><textarea id="languages" placeholder="Português - Nativo&#10;Inglês - Intermédio"></textarea></div>
+<div class="card">
+<h2>▦ CERTIFICAÇÕES</h2>
+<textarea id="certificates" placeholder="Certificação | Instituição | Ano"></textarea>
+<button class="btn outline" style="width:100%;margin-top:10px" onclick="clearAll()">🗑 Limpar tudo</button>
+</div>
+</aside>
+
+<main class="stage">
+<section class="cv" id="cv">
+<aside class="side">
+  <img id="cvPhoto" class="cvphoto" alt="">
+  <div>
+    <h3>CONTACTO</h3>
+    <div class="line" id="cvPhone">84 123 4567</div>
+    <div class="line" id="cvEmail">joao@email.com</div>
+    <div class="line" id="cvLocation">Maputo, Moçambique</div>
+    <div class="line" id="cvLinkedin"></div>
+  </div>
+  <div><h3>COMPETÊNCIAS</h3><div id="cvSkills"></div></div>
+  <div><h3>IDIOMAS</h3><div id="cvLanguages"></div></div>
+  <div><h3>CERTIFICAÇÕES</h3><div id="cvCertificates"></div></div>
+</aside>
+
+<main class="main">
+  <h1 class="cvname" id="cvName">JOÃO MANUEL DA SILVA</h1>
+  <div class="cvjob" id="cvJob">ASSISTENTE ADMINISTRATIVO</div>
+
+  <section class="section">
+    <h2>PERFIL PROFISSIONAL</h2>
+    <p id="cvProfile">Profissional dedicado e organizado, com boa capacidade de comunicação, aprendizagem e trabalho em equipa.</p>
+  </section>
+
+  <section class="section">
+    <h2>EXPERIÊNCIA PROFISSIONAL</h2>
+    <div id="cvExperience"></div>
+  </section>
+
+  <section class="section">
+    <h2>FORMAÇÃO ACADÉMICA</h2>
+    <div id="cvEducation"></div>
+  </section>
+</main>
+</section>
+</main>
+</div>
+</div>
+
+<script>
+const fields=["name","job","email","phone","location","linkedin","profile","experience","education","skills","languages","certificates"];
+
+const defaults={
+name:"JOÃO MANUEL DA SILVA",
+job:"ASSISTENTE ADMINISTRATIVO",
+email:"joao@email.com",
+phone:"84 123 4567",
+location:"Maputo, Moçambique",
+profile:"Profissional dedicado e organizado, com boa capacidade de comunicação, aprendizagem e trabalho em equipa.",
+experience:"Assistente Administrativo | Empresa Exemplo, Lda. | 2022 - Atual\nOrganização de documentos e atendimento ao cliente.\n\nAssistente de Escritório | Outra Empresa | 2020 - 2021\nApoio administrativo e gestão de correspondência.",
+education:"Licenciatura em Gestão de Empresas | Universidade Exemplo | 2018 - 2021",
+skills:"Comunicação\nTrabalho em equipa\nMicrosoft Office",
+languages:"Português - Nativo\nInglês - Intermédio",
+certificates:"Informática Básica | 2023"
+};
+
+function value(id){return document.getElementById(id).value.trim()}
+
+function htmlLines(text){
+  return text.split(/\n+/).filter(Boolean)
+    .map(x=>`<div style="margin-bottom:4px">${escapeHTML(x)}</div>`).join("");
+}
+
+function escapeHTML(text){
+  return text.replace(/[&<>"']/g, c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[c]));
+}
+
+function update(){
+  document.getElementById("cvName").textContent=(value("name")||defaults.name).toUpperCase();
+  document.getElementById("cvJob").textContent=(value("job")||defaults.job).toUpperCase();
+  document.getElementById("cvEmail").textContent=value("email")||defaults.email;
+  document.getElementById("cvPhone").textContent=value("phone")||defaults.phone;
+  document.getElementById("cvLocation").textContent=value("location")||defaults.location;
+  document.getElementById("cvLinkedin").textContent=value("linkedin");
+
+  document.getElementById("cvProfile").textContent=value("profile")||defaults.profile;
+  document.getElementById("cvExperience").innerHTML=htmlLines(value("experience")||defaults.experience);
+  document.getElementById("cvEducation").innerHTML=htmlLines(value("education")||defaults.education);
+  document.getElementById("cvSkills").innerHTML=htmlLines(value("skills")||defaults.skills);
+  document.getElementById("cvLanguages").innerHTML=htmlLines(value("languages")||defaults.languages);
+  document.getElementById("cvCertificates").innerHTML=htmlLines(value("certificates")||defaults.certificates);
+}
+
+fields.forEach(id=>document.getElementById(id).addEventListener("input",update));
+
+document.getElementById("photo").addEventListener("change",e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    document.getElementById("cvPhoto").src=reader.result;
+    document.getElementById("inputPhoto").src=reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+function clearAll(){
+  fields.forEach(id=>document.getElementById(id).value="");
+  document.getElementById("photo").value="";
+  document.getElementById("cvPhoto").removeAttribute("src");
+  document.getElementById("inputPhoto").removeAttribute("src");
+  update();
+}
+
+function setModel(model,el){
+  document.querySelectorAll(".model").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
+
+  const side=document.querySelector(".side");
+  if(model==="a"){
+    side.style.background="#102d4d";
+    document.documentElement.style.setProperty("--accent","#1769e0");
+  }
+  if(model==="b"){
+    side.style.background="#173e2e";
+    document.documentElement.style.setProperty("--accent","#2d8b57");
+  }
+  if(model==="c"){
+    side.style.background="#9a5b12";
+    document.documentElement.style.setProperty("--accent","#d8831f");
+  }
+}
+
+update();
+</script>
+</body>
+</html>
